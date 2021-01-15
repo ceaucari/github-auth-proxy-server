@@ -20,7 +20,6 @@ app.post('/auth', function (req, res) {
   const options = {
     method: 'POST',
     headers: {
-      'Access-Control-Allow-Origin': '*',
       'Content-Type': 'application/json',
       Accept: 'application/json',
     },
@@ -30,8 +29,19 @@ app.post('/auth', function (req, res) {
   fetch('https://github.com/login/oauth/access_token', options)
     .then(response => response.json())
     .then(response => {
-      console.log('response:', response);
+      const access_token = response.access_token;
+      return fetch(`https://api.github.com/user`, {
+        headers: {
+          Authorization: `token ${access_token}`,
+        },
+      });
+    })
+    .then(response => response.json())
+    .then(response => {
       return res.status(200).json(response);
+    })
+    .catch(error => {
+      return res.status(400).json(error);
     });
 });
 
